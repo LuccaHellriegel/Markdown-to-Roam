@@ -2,32 +2,35 @@
   (:require [clojure.test :refer [deftest testing is]]
             [markdown-to-roam.core :as sut]))
 
-(deftest trim-front-empty
+(deftest split-md-heading-empty
   (testing
-   "empty string is returned"
-    (is (= "" (sut/trim-newline-front "")))))
+   "empty coll is returned for empty str"
+    (is (empty? (sut/split-at-highest-md-heading "")))))
 
-(deftest trim-front-only
+(deftest split-md-heading-none
   (testing
-   "all newlines and returns are removed if only they exist"
-    (is (= "" (sut/trim-newline-front "\n\n\r\n\r\r\n")))))
+   "if no heading is found the original string in a collection is returned"
+    (is (= ["testString ###Text ##Text #Text"] (sut/split-at-highest-md-heading "testString ###Text ##Text #Text")))))
 
-(deftest trim-front-none
+(deftest split-md-heading-only
   (testing
-   "original string without newlines and returns is returned"
-    (is (= "testString" (sut/trim-newline-front "testString")))))
+   "if just a usable heading is there the returned coll is empty"
+    (is (= ["# "] (sut/split-at-highest-md-heading "# ")))))
 
-(deftest trim-front-couple
+(deftest split-md-heading-just-highest
   (testing
-   "a couple mixed newlines and returns get removed from the front"
-    (is (= "testString" (sut/trim-newline-front "\n\n\r\n\r\r\ntestString")))))
+   "only highest and not other headings lead to splitting"
+    (is
+     (=
+      ["Heading1\n TextText \n## Heading11 " "Heading2 \n TextText \n## Heading12\n"]
+      (sut/split-at-highest-md-heading "\n# Heading1\n TextText \n## Heading11 \n# Heading2 \n TextText \n## Heading12\n")))))
 
-(deftest trim-front-single-return
+(deftest transform-test
   (testing
-   "a single return gets removed from the front"
-    (is (= "testString" (sut/trim-newline-front "\rtestString")))))
+   ""
+    (is (=
+         (sut/transform-md "test \n# heading1\n text1 \n## heading11\n text11 \n# heading2\n text2\n## heading21\n text21 \n# heading3\n text")
+         "* test\n* heading1\n\t* text1\n\t* heading11\n\t\t* text11\n* heading2\n\t* text2\n\t* heading21\n\t\t* text21\n* heading3\n\t* text\n"))))
 
-(deftest trim-front-single-newline
-  (testing
-   "a single newline gets removed from the front"
-    (is (= "testString" (sut/trim-newline-front "\ntestString")))))
+
+; TODO: make file-based integration test so we can see the result correctly formatted
