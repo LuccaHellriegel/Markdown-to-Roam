@@ -8,10 +8,11 @@
 (defn to-block
   ([s]
    (to-block s 0))
-  ([s tabs] (str (repeat-tabs tabs) "* " s "\n")))
+  ([s tabs] (str (repeat-tabs tabs) "* " (str/trim s) "\n")))
 
-; TODO: is empty str possible? yes, find way to remove it before it goes into the vector
-; remove the str/blank? checks, also sometimes empty? -> maybe check before that iteration?
+; TODO: dont add * if already present
+; do other list markers too
+
 (defn post-process-md
   ([v]
    (post-process-md v 0))
